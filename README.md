@@ -15,7 +15,7 @@ An immersive Ben 10 themed website featuring a fully interactive 3D Omnitrix, al
 - Three.js
 
 ## Live Demo
-(Your Netlify link here)
+https://poseidonsben10site.netlify.app/
 
 ## Setup
 npm install  
