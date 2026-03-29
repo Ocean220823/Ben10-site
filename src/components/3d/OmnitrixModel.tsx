@@ -26,6 +26,8 @@ const OmnitrixModel = ({ hovered, setHovered, clicked, setClicked }: Props) => {
   });
 
   useEffect(() => {
+    let playOnce: (() => void) | null = null;
+    
     if (isHomePage) {
       audioRefs.current = {
         coreReady: new Audio("/Audios/core-ready.mp3"),
@@ -35,18 +37,22 @@ const OmnitrixModel = ({ hovered, setHovered, clicked, setClicked }: Props) => {
 
       const { coreReady } = audioRefs.current;
       if (coreReady) {
-        // Execute immediately since React mount acts as our 'load' phase in SPA
         coreReady.volume = 0.6;
-        coreReady.play().catch(() => {});
         
-        // Backup listener just in case it mounted before DOM finished parsing natively
-        window.addEventListener("load", () => {
+        playOnce = () => {
+          coreReady.currentTime = 0;
           coreReady.play().catch(() => {});
-        });
+          if (playOnce) window.removeEventListener('click', playOnce);
+        };
+        
+        window.addEventListener('click', playOnce);
       }
     }
 
     return () => {
+      // Cleanup event listener if unmounted before click
+      if (playOnce) window.removeEventListener('click', playOnce);
+      
       // Pause tracks gracefully on unmount preventing overlapping memory ghosts
       if (audioRefs.current.coreReady) audioRefs.current.coreReady.pause();
       if (audioRefs.current.activate) audioRefs.current.activate.pause();
@@ -168,7 +174,7 @@ const OmnitrixModel = ({ hovered, setHovered, clicked, setClicked }: Props) => {
   };
 
   return (
-    <group scale={isHomePage ? 0.85 : 1}>
+    <group scale={isHomePage ? 0.65 : 1}>
       <group 
         ref={groupRef}
         onPointerOver={() => setHovered(true)}
